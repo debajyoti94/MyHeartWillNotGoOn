@@ -75,7 +75,33 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
 
         return encoded_feature
 
-    def cleaning_data(self):
+    def cleaning_data(self, input_data):
+        '''
+        All the data cleaning and feature engineering
+         will happen here. This will work for both train and test data
+        :param input_data:
+        :return: cleaned_data,X,y in array format
+        '''
+
+        # drop the features that we do no want to keep
+        # while training the model
+        cleaned_input_data = input_data.drop(features_to_drop, axis=1,
+                                             inplace=False)
+
+        # missing age-imputation
+        cleaned_input_data['Age'] = cleaned_input_data[['Age', 'Sex']].apply(
+                                                                        self.fill_age, axis=1)
+        # label encoding feature: Sex
+        sex_labels = self.label_encoding(cleaned_input_data,'Sex')
+        cleaned_input_data['Sex_encoded'] = sex_labels
+
+        # splitting features and output (X,y)
+        X_data = cleaned_input_data.drop('Survived', axis=1,
+                                         inplace=False).values
+
+        y_data = cleaned_input_data['Survived'].values
+
+        return cleaned_input_data, X_data, y_data
 
     def load_pickled_file(self, filename):
         '''
@@ -109,5 +135,12 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         :param data: input data
         :return: a heatmap, stored on disk
         '''
+        try:
+            sns_heatmap_plot = sns.heatmap(data.isnull(), cmap='Blues', yticklabels=False)
+            sns_heatmap_plot.savefig('../plots/heatmap_null_features_check.png')
 
-        return
+            # if all succeeds
+            return 0
+        except Exception:
+            # if things fail
+            return -1
