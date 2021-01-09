@@ -2,7 +2,8 @@
 
 import pickle
 from config import titanic_train_set, titanic_test_set,\
-                    file_delimiter
+                    file_delimiter, baseline_X_train_set, \
+                    baseline_Y_train_set
 import pandas as pd
 import csv
 import os
@@ -39,4 +40,15 @@ class TestFunctionality:
 
 
     def test_cleaning_data(self):
-        return
+        '''
+        verify shape of the training data: (891,5) and (891,)
+        :return:
+        '''
+        with open(baseline_X_train_set, 'rb') as pickle_handle:
+            X_train = pickle.load(pickle_handle)
+
+        with open(baseline_Y_train_set, 'rb') as pickle_handle:
+            Y_train = pickle.load(pickle_handle)
+
+        assert True if X_train.shape == (891,5) and Y_train.shape == (891,) \
+            else False
