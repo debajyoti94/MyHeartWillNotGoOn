@@ -1,14 +1,16 @@
 ''' In this code we will add unit test functionalities using pytest module'''
 
-import pickle
+import pickle # for loading and dumping files (object serialization)
+# for checking if the config file details matches with our settings
 from config import titanic_train_set, titanic_test_set,\
                     file_delimiter, baseline_X_train_set, \
                     baseline_Y_train_set
-import pandas as pd
-import csv
-import os
+import pandas as pd # for loading the dataset
+import csv  # for finding delimiter
+import os   # to check if the file exists
 
 class TestFunctionality:
+
 
     def test_file_delimiter(self):
         '''
