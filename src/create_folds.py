@@ -7,7 +7,7 @@ import config
 import pickle
 from sklearn import model_selection
 
-class KFold:
+class SKFold:
 
     def __init__(self):
         '''
@@ -24,7 +24,9 @@ class KFold:
         :return:
         '''
         # initiate the kfold class from model_selection module
-        kf = model_selection.StratifiedKFold(n_splits=self.num_folds)
+        # keeping shuffle and random state so that we can replicate the experiments
+        kf = model_selection.StratifiedKFold(n_splits=self.num_folds,
+                                             shuffle=True, random_state=0)
 
         # fetch target class
         y = dataset_df['Survived'].values
