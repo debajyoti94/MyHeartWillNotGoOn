@@ -4,13 +4,15 @@ that were applied to train set in the notebook'''
 from config import titanic_train_set, titanic_test_set,\
                     output_feature, features_to_drop,\
                     file_delimiter, male_mean_age,\
-                    female_mean_age
+                    female_mean_age, null_check_heatmap_file
 
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
 import abc
 import pickle
 import seaborn as sns
+from create_folds import SKFold
+
 
 # creating a template of functions that i absolutely need
 # so that i don't forget about it
@@ -19,12 +21,7 @@ class MustHaveForFeatureEngineering(object):
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractmethod
-    def load_pickled_file(self, filename):
-        return
-
-    @abc.abstractmethod
-    def dump_file(self, data,
-                  filename, path):
+    def cleaning_data(self, data):
         return
 
     @abc.abstractmethod
@@ -75,12 +72,13 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
 
         return encoded_feature
 
-    def cleaning_data(self, input_data):
+    def cleaning_data(self, input_data, dataset_type):
         '''
         All the data cleaning and feature engineering
          will happen here. This will work for both train and test data
         :param input_data:
-        :return: cleaned_data,X,y in array format
+        :param dataset_type:
+        :return:
         '''
 
         # drop the features that we do no want to keep
@@ -94,14 +92,27 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         # label encoding feature: Sex
         sex_labels = self.label_encoding(cleaned_input_data,'Sex')
         cleaned_input_data['Sex_encoded'] = sex_labels
+        cleaned_input_data.drop('Sex', axis=1, inplace=True)
 
-        # splitting features and output (X,y)
-        X_data = cleaned_input_data.drop('Survived', axis=1,
-                                         inplace=False).values
+        # this part is only for training data
+        if dataset_type == "TRAIN":
+            # create the heatmap plot of null values as a check
+            self.plot_null_values(cleaned_input_data)
 
-        y_data = cleaned_input_data['Survived'].values
+            # create a k-fold column which will be used for cross validation
+            cleaned_input_data['kf'] = -1
 
-        return cleaned_input_data, X_data, y_data
+            # create stratified kfold cross validation
+            skfold_obj = SKFold()
+            cleaned_input_data = skfold_obj.create_folds(cleaned_input_data)
+
+        # # splitting features and output (X,y)
+        # X_data = cleaned_input_data.drop('Survived', axis=1,
+        #                                  inplace=False)
+        #
+        # y_data = cleaned_input_data['Survived']
+
+        return cleaned_input_data
 
     def load_pickled_file(self, filename):
         '''
@@ -137,7 +148,7 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         '''
         try:
             sns_heatmap_plot = sns.heatmap(data.isnull(), cmap='Blues', yticklabels=False)
-            sns_heatmap_plot.savefig('../plots/heatmap_null_features_check.png')
+            sns_heatmap_plot.savefig(null_check_heatmap_file)
 
             # if all succeeds
             return 0
