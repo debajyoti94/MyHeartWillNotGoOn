@@ -25,6 +25,7 @@ class SKFold:
         '''
         # initiate the kfold class from model_selection module
         # keeping shuffle and random state so that we can replicate the experiments
+
         kf = model_selection.StratifiedKFold(n_splits=self.num_folds,
                                              shuffle=True, random_state=0)
 
