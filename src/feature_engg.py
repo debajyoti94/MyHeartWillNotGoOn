@@ -86,17 +86,17 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         cleaned_input_data = input_data.drop(features_to_drop, axis=1,
                                              inplace=False)
 
-        # missing age-imputation
-        cleaned_input_data['Age'] = cleaned_input_data[['Age', 'Sex']].apply(
-                                                                        self.fill_age, axis=1)
-        # label encoding feature: Sex
-        sex_labels = self.label_encoding(cleaned_input_data,'Sex')
-        cleaned_input_data['Sex_encoded'] = sex_labels
-        cleaned_input_data.drop('Sex', axis=1, inplace=True)
-        self.plot_null_values(cleaned_input_data)
-
         # this part is only for training data
         if dataset_type == "TRAIN":
+            # missing age-imputation
+            cleaned_input_data['Age'] = cleaned_input_data[['Age', 'Sex']].apply(
+                self.fill_age, axis=1)
+            # label encoding feature: Sex
+            sex_labels = self.label_encoding(cleaned_input_data, 'Sex')
+            cleaned_input_data['Sex_encoded'] = sex_labels
+            cleaned_input_data.drop('Sex', axis=1, inplace=True)
+            self.plot_null_values(cleaned_input_data)
+
             # create the heatmap plot of null values as a check
             self.plot_null_values(cleaned_input_data)
 
@@ -107,11 +107,20 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
             skfold_obj = SKFold()
             cleaned_input_data = skfold_obj.create_folds(cleaned_input_data)
 
-        # # splitting features and output (X,y)
-        # X_data = cleaned_input_data.drop('Survived', axis=1,
-        #                                  inplace=False)
-        #
-        # y_data = cleaned_input_data['Survived']
+        elif dataset_type == 'TEST':
+            # missing age-imputation
+            cleaned_input_data['Age'] = cleaned_input_data[['Age', 'Sex']].apply(
+                self.fill_age, axis=1)
+            # fare column has some missing values
+            # so we will fill it up based on the mean value
+            cleaned_input_data['Fare'] = cleaned_input_data[['Sex', 'Fare']].apply(
+                self.fill_fare,
+                axis=1)
+
+            sex_labels = self.label_encoding(cleaned_input_data, 'Sex')
+            cleaned_input_data['Sex_encoded'] = sex_labels
+            cleaned_input_data.drop('Sex', axis=1, inplace=True)
+            self.plot_null_values(cleaned_input_data)
 
         return cleaned_input_data
 
@@ -123,6 +132,25 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         '''
         with open(filename, 'rb') as pickle_handle:
             return pickle.load(pickle_handle)
+
+    def fill_fare(self, gender_fare_tuple):
+        '''
+        Fare feature is missing, so we fill it up based
+         on mean values obtained
+        :param fare_gender_tuple: (sex,fare)
+        :return: imputed fare
+        '''
+        sex = gender_fare_tuple[0]
+        fare = gender_fare_tuple[1]
+
+        if pd.isnull(fare):
+            if sex is 'Male':
+                return 8
+            else:
+                return 18
+        else:
+            return fare
+
 
     def dump_file(self, data,
                   filename, path):
