@@ -93,6 +93,7 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         sex_labels = self.label_encoding(cleaned_input_data,'Sex')
         cleaned_input_data['Sex_encoded'] = sex_labels
         cleaned_input_data.drop('Sex', axis=1, inplace=True)
+        self.plot_null_values(cleaned_input_data)
 
         # this part is only for training data
         if dataset_type == "TRAIN":
@@ -100,7 +101,7 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
             self.plot_null_values(cleaned_input_data)
 
             # create a k-fold column which will be used for cross validation
-            cleaned_input_data['kf'] = -1
+            cleaned_input_data['kfold'] = -1
 
             # create stratified kfold cross validation
             skfold_obj = SKFold()
@@ -146,12 +147,7 @@ class FeatureEngineering(MustHaveForFeatureEngineering):
         :param data: input data
         :return: a heatmap, stored on disk
         '''
-        try:
-            sns_heatmap_plot = sns.heatmap(data.isnull(), cmap='Blues', yticklabels=False)
-            sns_heatmap_plot.savefig(null_check_heatmap_file)
 
-            # if all succeeds
-            return 0
-        except Exception:
-            # if things fail
-            return -1
+        sns_heatmap_plot = sns.heatmap(data.isnull(), cmap='Blues', yticklabels=False)
+        sns_heatmap_plot.figure.savefig(null_check_heatmap_file)
+
