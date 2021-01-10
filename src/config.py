@@ -22,6 +22,7 @@ baseline_Y_test_set = "../input/baseline_Y_test_set.pickle"
 
 # for saving the model
 baseline_model = "../models/LR_Baseline"
+best_baseline_model = "../models/LR_Baseline_2"
 fe_model = "../models/LR_FE"
 
 # plots
