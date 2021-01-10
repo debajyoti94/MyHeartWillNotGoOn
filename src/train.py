@@ -63,26 +63,16 @@ def train_model(dataset, fold):
 
 def inference_time(model, test_data):
     '''
-    This is where we apply obtain performance on the test set
+    This is where we apply obtain predictions on the test set
     :param model:
     :param test_data:
     :return:
     '''
-    print(test_data.isnull().any())
     X_test = test_data.values
 
-    for input in X_test:
+    preds = model.predict(X_test)
+    print(preds)
 
-        print(input)
-        preds = model.predict(input)
-        print(preds)
-    # accuracy = metrics.accuracy_score(y_test, preds)
-    # p,r,f1_score,support = metrics.precision_recall_fscore_support(y_test,
-    #                                                                preds)
-    #
-    # print("Test set accuracy = {}".format(accuracy))
-    # print("---Test set---\nAccuracy={}\nPrecision={}\nRecall={}\nF1={}".
-    #       format(accuracy, p, r, f1_score))
 
 
 if __name__ == "__main__":
@@ -127,5 +117,3 @@ if __name__ == "__main__":
             inference_model = pickle.load(pickle_handle)
 
         inference_time(inference_model, cleaned_data)
-
-        print("Code not ready yet for model inference.")
